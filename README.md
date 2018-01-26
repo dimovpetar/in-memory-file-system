@@ -4,10 +4,10 @@
 
 Supported commands:
 * pwd
-* cd directory
-* ls directory
-* rm <file1> ... <filen>
-* cat <file1> <file2> ... > <outputfile>
+* cd *directory*
+* ls *directory*
+* rm *file...*
+* cat *file...> outputfile*
   cat <file1> <file2> ...
   cat > <outputfile>
 
