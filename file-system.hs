@@ -56,23 +56,18 @@ cd path dir = moveTo path dir
 moveTo :: Name -> Node -> Node 
 moveTo path dir = 
     if isAbsolute path
-        then helper path (fileSystem, [])
-        else helper path dir
-    where helper fullPath dir
-            | fullPath == ""    = dir
-            | path     == ".."  = helper remainingPath (traverseUp dir)
-            | otherwise         = helper remainingPath (traverseDown path dir)
-            where (path, remainingPath) = splitPath fullPath
+        then helper (splitPath (tail path)) (fileSystem, [])
+        else helper (splitPath path) dir
+    where helper p currDir
+            | length p == 0    = currDir
+            | head p     == ".."  = helper (tail p) (traverseUp currDir)
+            | otherwise         = helper (tail p) (traverseDown (head p) currDir)
+
+splitPath :: Name -> [Name]
+splitPath path = splitOn "/" path
 
 isAbsolute :: Name -> Bool
 isAbsolute (prefix:path) = prefix == '/'
-
-splitPath :: Name -> (String, String)
-splitPath p
-        | not ('/' `elem` p) = (p, [])
-        | a == "" = splitPath c
-        | otherwise = (a,c)
-        where (a, b:c) = break (\x -> x == '/') p
 
 getFile :: Name -> Node -> File
 getFile name dir = file
@@ -118,9 +113,9 @@ fileExists (File name content) ((File fileName _):files)
 
 
 addFile :: File -> Node -> Node
-addFile file (Directory parentName files, leftOvers) 
-        | not (fileExists file files)   = (Directory parentName newFiles,leftOvers)
-        | otherwise                     = replaceFile file (Directory parentName newFiles,leftOvers)
+addFile file (Directory parentName files, restFiles) 
+        | not (fileExists file files)   = (Directory parentName newFiles,restFiles)
+        | otherwise                     = replaceFile file (Directory parentName newFiles,restFiles)
         where newFiles = files ++ [file]
 
 -- cat file1 file2 .. fileN > file
